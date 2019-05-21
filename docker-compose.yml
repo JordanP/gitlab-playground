@@ -1,0 +1,34 @@
+version: "3.7"
+services:
+  web:
+    image: ${IMAGE:-gitlab-playground-run:latest}
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://myuser:mypass@db/myuser?sslmode=disable
+      - FLASK_ENV=development
+      - PYTHONUNBUFFERED=1
+
+  test:
+    image: ${IMAGE:-gitlab-playground-test:latest}
+    command: pytest --verbose --capture=no
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://myuser:mypass@db/myuser?sslmode=disable
+      - DEBUG=True
+      - TESTING=True
+      - VERSION=unknown
+
+  lint:
+    image: ${IMAGE:-gitlab-playground-test:latest}
+    command: flake8
+
+  db:
+    image: postgres:11
+    command: -c fsync=off -c synchronous_commit=off -c full_page_writes=off
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypass

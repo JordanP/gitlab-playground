@@ -1,0 +1,46 @@
+image:
+  name: docker/compose:1.24.0
+  entrypoint: ["/bin/sh", "-c"]
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - release
+
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+  CONTAINER_TEST_IMG_WITH_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  CONTAINER_RELEASE_IMG_WITHOUT_TAG: $CI_REGISTRY_IMAGE
+
+before_script:
+  - docker version
+  - docker-compose version
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+build:
+  stage: build
+  script:
+    - ./scripts/docker-build-push-test-img.sh
+
+test1:
+  stage: test
+  script:
+    - docker pull $CONTAINER_TEST_IMG_WITH_TAG
+    - IMAGE=$CONTAINER_TEST_IMG_WITH_TAG docker-compose -f docker-compose.yml run test
+
+test2:
+  stage: test
+  script:
+    - docker pull $CONTAINER_TEST_IMG_WITH_TAG
+    - IMAGE=$CONTAINER_TEST_IMG_WITH_TAG docker-compose -f docker-compose.yml run lint
+
+release-image:
+  stage: release
+  script:
+    - ./scripts/docker-build-push-prod-img.sh
+  only:
+    - master

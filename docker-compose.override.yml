@@ -1,0 +1,22 @@
+version: "3.7"
+services:
+  web:
+    build:
+      context: .
+      target: run
+      args:
+        - VERSION=${VERSION:-unknown}
+    volumes:
+      - .:/app
+  test:
+    build:
+      context: .
+      target: test
+    volumes:
+      - .:/app
+  lint:
+    build:
+      context: .
+      target: test
+    volumes:
+      - .:/app
