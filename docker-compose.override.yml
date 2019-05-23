@@ -12,11 +12,18 @@ services:
     build:
       context: .
       target: test
+    command: pipenv run pytest --verbose --capture=no
     volumes:
       - .:/app
+    environment:
+      - PIPENV_VENV_IN_PROJECT=true
+
   lint:
     build:
       context: .
       target: test
+    command: pipenv run flake8 app.py tests/ hello_world/
     volumes:
       - .:/app
+    environment:
+      - PIPENV_VENV_IN_PROJECT=true

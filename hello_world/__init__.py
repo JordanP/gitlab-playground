@@ -15,7 +15,7 @@ def make_app():
         with contextlib.closing(psycopg2.connect(db_url)) as conn:
             with contextlib.closing(conn.cursor()) as cur:
                 cur.execute("SELECT to_char(current_date, 'Day');")
-                day = cur.fetchone()[0]
+                day = cur.fetchone()[0].rstrip()
                 return 'Today is a %s. Running version %s' % (day, version)
 
     return app

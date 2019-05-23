@@ -9,7 +9,6 @@ services:
     environment:
       - DATABASE_URL=postgres://myuser:mypass@db/myuser?sslmode=disable
       - FLASK_ENV=development
-      - PYTHONUNBUFFERED=1
 
   test:
     image: ${IMAGE:-gitlab-playground-test:latest}
@@ -24,7 +23,7 @@ services:
 
   lint:
     image: ${IMAGE:-gitlab-playground-test:latest}
-    command: flake8
+    command: flake8 app.py tests/ hello_world/
 
   db:
     image: postgres:11
