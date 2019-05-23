@@ -11,7 +11,7 @@ def make_app():
     @app.route('/')
     def homepage():
         db_url = os.getenv("DATABASE_URL")
-        version = os.getenv("VERSION")
+        version = os.getenv("VERSION", "unknown")
         with contextlib.closing(psycopg2.connect(db_url)) as conn:
             with contextlib.closing(conn.cursor()) as cur:
                 cur.execute("SELECT to_char(current_date, 'Day');")

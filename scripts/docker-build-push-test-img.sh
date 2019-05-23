@@ -2,12 +2,36 @@
 set -xue
 set -o pipefail
 
-# Try to populate the docker cache (https://pythonspeed.com/articles/faster-multi-stage-builds/)
-docker pull $CONTAINER_RELEASE_IMG_WITHOUT_TAG:latest || true
+# https://andrewlock.net/caching-docker-layers-on-serverless-build-hosts-with-multi-stage-builds---target,-and---cache-from/
 
-echo "Building $CONTAINER_TEST_IMG_WITH_TAG"
 
-docker build --pull -t $CONTAINER_TEST_IMG_WITH_TAG --build-arg VERSION=unknown .
-docker push $CONTAINER_TEST_IMG_WITH_TAG
+docker pull $CI_REGISTRY_IMAGE:builder || true
+docker build --target builder \
+    --cache-from $CI_REGISTRY_IMAGE:builder \
+    -t $CI_REGISTRY_IMAGE:builder .
+
+
+docker pull $CI_REGISTRY_IMAGE:run || true
+docker build --target run \
+    --cache-from $CI_REGISTRY_IMAGE:builder \
+    --cache-from $CI_REGISTRY_IMAGE:run \
+    -t $CI_REGISTRY_IMAGE:run \
+    .
+
+
+docker pull $CI_REGISTRY_IMAGE:latest || true
+docker build \
+    --cache-from=$CI_REGISTRY_IMAGE:builder \
+    --cache-from=$CI_REGISTRY_IMAGE:run \
+    --cache-from=$CI_REGISTRY_IMAGE:latest \
+    -t $CI_REGISTRY_IMAGE:latest \
+    -t $CI_REGISTRY_IMAGE:$VERSION \
+    .
+
+# Push builder image to remote repository for next build
+docker push $CI_REGISTRY_IMAGE:builder
+docker push $CI_REGISTRY_IMAGE:run
+docker push $CI_REGISTRY_IMAGE:latest
+docker push $CI_REGISTRY_IMAGE:$VERSION
 
 

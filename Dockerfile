@@ -1,5 +1,4 @@
-FROM ubuntu:18.04 as run
-#
+FROM ubuntu:18.04 as builder
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
@@ -8,11 +7,13 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update && apt-get install -y \
-    python3 python3-venv python3-pip libpq-dev \
+    libpq-dev \
+    python3-pip \
  && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install --upgrade pip wheel
-RUN pip3 install pipenv
+RUN pip3 install --upgrade pip wheel pipenv
+
+FROM builder as run
 
 WORKDIR /app
 
@@ -25,13 +26,14 @@ RUN pipenv install --deploy --system
 COPY app.py .
 COPY hello_world hello_world
 
-ARG VERSION
-ENV VERSION ${VERSION}
+#ARG VERSION This doesn't play nicely with docker cache
+#ENV VERSION ${VERSION}
 CMD ["flask", "run", "--host", "0.0.0.0", "--port", "5000"]
 EXPOSE 5000
 
 
 FROM run as test
+
 COPY tests tests
 RUN pipenv install --system --deploy --dev
 
