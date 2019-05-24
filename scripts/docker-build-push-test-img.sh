@@ -3,7 +3,7 @@ set -xue
 set -o pipefail
 
 # https://andrewlock.net/caching-docker-layers-on-serverless-build-hosts-with-multi-stage-builds---target,-and---cache-from/
-
+# https://medium.com/@gajus/making-docker-in-docker-builds-x2-faster-using-docker-cache-from-option-c01febd8ef84
 
 docker pull $CI_REGISTRY_IMAGE:builder || true
 docker build --target builder \

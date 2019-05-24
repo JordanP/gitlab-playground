@@ -8,6 +8,7 @@ services:
       #  - VERSION=${VERSION:-unknown}
     volumes:
       - .:/app
+      - pipenv-venv:/root/.local/share/virtualenvs
   test:
     build:
       context: .
@@ -15,8 +16,7 @@ services:
     command: pipenv run pytest --verbose --capture=no
     volumes:
       - .:/app
-    environment:
-      - PIPENV_VENV_IN_PROJECT=true
+      - pipenv-venv:/root/.local/share/virtualenvs
 
   lint:
     build:
@@ -25,5 +25,7 @@ services:
     command: pipenv run flake8 app.py tests/ hello_world/
     volumes:
       - .:/app
-    environment:
-      - PIPENV_VENV_IN_PROJECT=true
+      - pipenv-venv:/root/.local/share/virtualenvs
+
+volumes:
+  pipenv-venv: # Persist Pipenv venv (by default in ~/.local/share/virtualenvs)
