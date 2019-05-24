@@ -28,18 +28,18 @@ build:
 test1:
   stage: test
   script:
-    - docker pull $CI_REGISTRY_IMAGE:$VERSION
-    - IMAGE=$CI_REGISTRY_IMAGE:$VERSION docker-compose -f docker-compose.yml run test
+    - docker pull $CI_REGISTRY_IMAGE:build-$VERSION
+    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run test
 
 test2:
   stage: test
   script:
-    - docker pull $CI_REGISTRY_IMAGE:$VERSION
-    - IMAGE=$CI_REGISTRY_IMAGE:$VERSION docker-compose -f docker-compose.yml run lint
+    - docker pull $CI_REGISTRY_IMAGE:build-$VERSION
+    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run lint
 
 release-image:
   stage: release
   script:
     - ./scripts/docker-build-push-prod-img.sh
-  only:
-    - master
+  #only:
+  #  - master

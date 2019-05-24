@@ -4,16 +4,14 @@ services:
     build:
       context: .
       target: run
-      #args:
-      #  - VERSION=${VERSION:-unknown}
+    command: "--http-socket 0.0.0.0:5000 --processes 2 --module hello_world.app:app --py-autoreload 1"
     volumes:
       - .:/app
       - pipenv-venv:/root/.local/share/virtualenvs
   test:
     build:
       context: .
-      target: test
-    command: pipenv run pytest --verbose --capture=no
+      target: build
     volumes:
       - .:/app
       - pipenv-venv:/root/.local/share/virtualenvs
@@ -21,8 +19,7 @@ services:
   lint:
     build:
       context: .
-      target: test
-    command: pipenv run flake8 app.py tests/ hello_world/
+      target: build
     volumes:
       - .:/app
       - pipenv-venv:/root/.local/share/virtualenvs

@@ -11,8 +11,8 @@ services:
       - FLASK_ENV=development
 
   test:
-    image: ${IMAGE:-gitlab-playground-test:latest}
-    command: pytest --verbose --capture=no
+    image: ${IMAGE:-gitlab-playground-build:latest}
+    command: pipenv run pytest --verbose --capture=no
     depends_on:
       - db
     environment:
@@ -22,8 +22,8 @@ services:
       - VERSION=unknown
 
   lint:
-    image: ${IMAGE:-gitlab-playground-test:latest}
-    command: flake8 app.py tests/ hello_world/
+    image: ${IMAGE:-gitlab-playground-build:latest}
+    command: pipenv run flake8 tests/ hello_world/
 
   db:
     image: postgres:11
