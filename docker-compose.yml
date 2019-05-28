@@ -31,3 +31,13 @@ services:
     environment:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypass
+
+networks:
+  default:
+    driver: bridge
+    # https://medium.com/@sylwit/how-we-spent-a-full-day-figuring-out-a-mtu-issue-with-docker-4d81fdfe2caf
+    # Problem would only appear when running curl on an HTTPS (only S) website inside a docker container
+    # Only with Typhoon Kubernetes (self-hosted Gitlab on K8s)
+    # Check MTU frag with "ping -c 3 -M do -s 1410 google.fr"
+    driver_opts:
+      com.docker.network.driver.mtu: 1410

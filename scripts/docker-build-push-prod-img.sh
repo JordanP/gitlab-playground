@@ -5,7 +5,7 @@ set -o pipefail
 #export VERSION=$(git describe --tags --always --dirty)  --- fail because git is not installed in runner image
 
 docker pull $CI_REGISTRY_IMAGE:build-$VERSION
-docker pull $CI_REGISTRY_IMAGE:latest
+docker pull $CI_REGISTRY_IMAGE:latest || true
 
 docker build --pull \
     --cache-from=$CI_REGISTRY_IMAGE:build-$VERSION \
