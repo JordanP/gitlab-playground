@@ -12,18 +12,29 @@ services:
 
   test:
     image: ${IMAGE:-gitlab-playground-build:latest}
-    command: pipenv run pytest --verbose --capture=no
+    command: pipenv run pytest --verbose --capture=no --cov=hello_world --cov-report term-missing
     depends_on:
       - db
     environment:
+      - COVERAGE_FILE=coverage/.coverage
       - DATABASE_URL=postgres://myuser:mypass@db/myuser?sslmode=disable
       - DEBUG=True
       - TESTING=True
       - VERSION=unknown
+    volumes:
+      - ./coverage/:/app/coverage/
 
   lint:
     image: ${IMAGE:-gitlab-playground-build:latest}
     command: pipenv run flake8 tests/ hello_world/
+
+  cover:
+    image: ${IMAGE:-gitlab-playground-build:latest}
+    command: pipenv run coverage report --show-missing --fail-under 100
+    environment:
+      - COVERAGE_FILE=coverage/.coverage
+    volumes:
+      - ./coverage/:/app/coverage/
 
   db:
     image: postgres:11

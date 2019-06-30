@@ -8,11 +8,12 @@ services:
 stages:
   - build
   - test
+  - cover
   - release
 
 variables:
-  #DOCKER_HOST: tcp://docker:2375/
-  DOCKER_HOST: tcp://localhost:2375
+  DOCKER_HOST: tcp://docker:2375/
+  #DOCKER_HOST: tcp://localhost:2375
   DOCKER_DRIVER: overlay2
   VERSION: $CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
 
@@ -31,12 +32,24 @@ py-test:
   script:
     - docker pull $CI_REGISTRY_IMAGE:build-$VERSION
     - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run test
+  artifacts:
+    paths:
+    - coverage/
 
 lint:
   stage: test
   script:
     - docker pull $CI_REGISTRY_IMAGE:build-$VERSION
     - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run lint
+
+cover:
+  stage: cover
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:build-$VERSION
+    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run cover
+  dependencies:
+    - py-test
+  coverage: '/TOTAL.*\s(\d+)%/'
 
 release-image:
   stage: release
