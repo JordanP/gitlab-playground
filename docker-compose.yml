@@ -16,7 +16,6 @@ services:
     depends_on:
       - db
     environment:
-      - COVERAGE_FILE=coverage/.coverage
       - DATABASE_URL=postgres://myuser:mypass@db/myuser?sslmode=disable
       - DEBUG=True
       - TESTING=True
@@ -30,9 +29,7 @@ services:
 
   cover:
     image: ${IMAGE:-gitlab-playground-build:latest}
-    command: pipenv run coverage report --show-missing --fail-under 100
-    environment:
-      - COVERAGE_FILE=coverage/.coverage
+    command: pipenv run coverage report --show-missing --fail-under 81
     volumes:
       - ./coverage/:/app/coverage/
 

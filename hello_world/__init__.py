@@ -19,3 +19,7 @@ def make_app():
                 return 'Today is a %s. Running version %s' % (day, version)
 
     return app
+
+
+def some_func():
+    return 42

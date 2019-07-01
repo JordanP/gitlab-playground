@@ -27,11 +27,24 @@ build:
   script:
     - ./scripts/docker-build-push-test-img.sh
 
-py-test:
+py-test-unit:
   stage: test
+  variables:
+    COVERAGE_FILE: coverage/.coverage.unit
   script:
     - docker pull $CI_REGISTRY_IMAGE:build-$VERSION
-    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run test
+    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e COVERAGE_FILE test pipenv run pytest -v --capture=no --cov=hello_world --cov-report= --junitxml=coverage/junit-unit.xml  tests/unit
+  artifacts:
+    paths:
+    - coverage/
+
+py-test-func:
+  stage: test
+  variables:
+    COVERAGE_FILE: coverage/.coverage.func
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:build-$VERSION
+    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e COVERAGE_FILE test pipenv run pytest -v --capture=no --cov=hello_world --cov-report= --junitxml=coverage/junit-func.xml  tests/func
   artifacts:
     paths:
     - coverage/
@@ -44,11 +57,17 @@ lint:
 
 cover:
   stage: cover
+  variables:
+    COVERAGE_FILE: coverage/.coverage
   script:
     - docker pull $CI_REGISTRY_IMAGE:build-$VERSION
-    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run cover
-  dependencies:
-    - py-test
+    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e COVERAGE_FILE cover pipenv run coverage combine coverage/
+    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e COVERAGE_FILE cover
+  artifacts:
+    paths:
+      - coverage/
+    reports:
+      junit: coverage/*.xml
   coverage: '/TOTAL.*\s(\d+)%/'
 
 release-image:

@@ -13,6 +13,8 @@ services:
     build:
       context: .
       target: build
+    environment:
+      - COVERAGE_FILE=coverage/.coverage
     volumes:
       - .:/app
       - pipenv-venv:/root/.local/share/virtualenvs
@@ -21,6 +23,16 @@ services:
     build:
       context: .
       target: build
+    volumes:
+      - .:/app
+      - pipenv-venv:/root/.local/share/virtualenvs
+
+  cover:
+    build:
+      context: .
+      target: build
+    environment:
+      - COVERAGE_FILE=coverage/.coverage
     volumes:
       - .:/app
       - pipenv-venv:/root/.local/share/virtualenvs
