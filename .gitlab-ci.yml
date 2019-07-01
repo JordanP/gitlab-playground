@@ -33,7 +33,7 @@ py-test-unit:
     COVERAGE_FILE: coverage/.coverage.unit
   script:
     - docker pull $CI_REGISTRY_IMAGE:build-$VERSION
-    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e COVERAGE_FILE test pipenv run pytest -v --capture=no --cov=hello_world --cov-report= --junitxml=coverage/junit-unit.xml  tests/unit
+    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e COVERAGE_FILE test pipenv run pytest -v --capture=no --cov=hello_world --cov-report= --junitxml=coverage/junit-unit.xml tests/unit
   artifacts:
     paths:
     - coverage/
@@ -44,7 +44,7 @@ py-test-func:
     COVERAGE_FILE: coverage/.coverage.func
   script:
     - docker pull $CI_REGISTRY_IMAGE:build-$VERSION
-    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e COVERAGE_FILE test pipenv run pytest -v --capture=no --cov=hello_world --cov-report= --junitxml=coverage/junit-func.xml  tests/func
+    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e COVERAGE_FILE test pipenv run pytest -v --capture=no --cov=hello_world --cov-report= --junitxml=coverage/junit-func.xml tests/func
   artifacts:
     paths:
     - coverage/
@@ -59,10 +59,13 @@ cover:
   stage: cover
   variables:
     COVERAGE_FILE: coverage/.coverage
+    CODECOV_TOKEN: 2e46b3f9-08aa-41ac-88b7-bec1c93c8470
   script:
     - docker pull $CI_REGISTRY_IMAGE:build-$VERSION
     - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e COVERAGE_FILE cover pipenv run coverage combine coverage/
     - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e COVERAGE_FILE cover
+    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e COVERAGE_FILE cover pipenv run coverage xml -o coverage/coverage.xml
+    - IMAGE=$CI_REGISTRY_IMAGE:build-$VERSION docker-compose -f docker-compose.yml run -e CODECOV_TOKEN cover pipenv run codecov --file coverage/coverage.xml --disable=detect -F python --commit=$CI_COMMIT_SHA --branch=$CI_COMMIT_REF_SLUG
   artifacts:
     paths:
       - coverage/

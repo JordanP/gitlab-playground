@@ -12,7 +12,7 @@ services:
 
   test:
     image: ${IMAGE:-gitlab-playground-build:latest}
-    command: pipenv run pytest --verbose --capture=no --cov=hello_world --cov-report term-missing
+    command: pipenv run pytest --verbose --capture=no --cov=hello_world --cov-report term-missing --cov-report xml:coverage/coverage.xml
     depends_on:
       - db
     environment:

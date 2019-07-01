@@ -15,6 +15,7 @@ flake8 = "*"
 pbr = "*"
 pytest-cov = "*"
 coverage = "*"
+codecov = "*"
 
 [requires]
 python_version = "3.6"
