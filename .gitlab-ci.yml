@@ -17,6 +17,7 @@ variables:
   DOCKER_DRIVER: overlay2
   VERSION: $CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
   IMAGE: $CI_REGISTRY_IMAGE:build-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+  DCR: "docker-compose -f docker-compose.yml run"
   CODECOV_TOKEN: 2e46b3f9-08aa-41ac-88b7-bec1c93c8470
 
 before_script:
@@ -32,6 +33,7 @@ build:
 .py_test: &py_test
   stage: test
   before_script:
+    - export pytestParams="-v --capture=no --cov=hello_world --cov-report="
     - docker pull $IMAGE
   artifacts:
     paths:
@@ -42,20 +44,20 @@ py-test-unit:
   variables:
     COVERAGE_FILE: coverage/.coverage.unit
   script:
-    - docker-compose -f docker-compose.yml run -e COVERAGE_FILE test pipenv run pytest -v --capture=no --cov=hello_world --cov-report= --junitxml=coverage/junit-unit.xml tests/unit
+    - $DCR -e COVERAGE_FILE test pipenv run pytest $pytestParams --junitxml=coverage/junit-unit.xml tests/unit
 
 py-test-func:
   <<: *py_test
   variables:
     COVERAGE_FILE: coverage/.coverage.func
   script:
-    - docker-compose -f docker-compose.yml run -e COVERAGE_FILE test pipenv run pytest -v --capture=no --cov=hello_world --cov-report= --junitxml=coverage/junit-func.xml tests/func
+    - $DCR -e COVERAGE_FILE test pipenv run pytest $pytestParams --junitxml=coverage/junit-func.xml tests/func
 
 lint:
   stage: test
   script:
     - docker pull $IMAGE
-    - docker-compose -f docker-compose.yml run lint
+    - $DCR lint
 
 cover:
   stage: cover
@@ -63,11 +65,11 @@ cover:
     COVERAGE_FILE: coverage/.coverage
   script:
     - docker pull $IMAGE
-    - docker-compose -f docker-compose.yml run -e COVERAGE_FILE cover pipenv run coverage combine coverage/
-    - docker-compose -f docker-compose.yml run -e COVERAGE_FILE cover
-    - docker-compose -f docker-compose.yml run -e COVERAGE_FILE cover pipenv run coverage xml -o coverage/coverage.xml
-    - ls -laR coverage
-    - docker-compose -f docker-compose.yml run -e CODECOV_TOKEN cover pipenv run codecov --file coverage/coverage.xml --disable=detect -F python --commit=$CI_COMMIT_SHA --branch=$CI_COMMIT_REF_SLUG
+    - $DCR -e COVERAGE_FILE cover pipenv run coverage combine coverage/
+    - $DCR -e COVERAGE_FILE cover
+    - $DCR -e COVERAGE_FILE cover pipenv run coverage xml -o coverage/coverage.xml
+    # We can't use the bash uploader because the docker/compose:1.24.0 image doesn't have bash !
+    - $DCR -e CODECOV_TOKEN cover pipenv run codecov --file coverage/coverage.xml --disable=detect -F python --commit=$CI_COMMIT_SHA --branch=$CI_COMMIT_REF_SLUG
   artifacts:
     paths:
       - coverage/
@@ -79,5 +81,6 @@ release-image:
   stage: release
   script:
     - ./scripts/docker-build-push-prod-img.sh
+  dependencies: [] # We don't care about coverage/ reports
   #only:
   #  - master

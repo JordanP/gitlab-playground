@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 flask = "*"
 psycopg2 = "*"
-pytest = "*"
 requests = "*"
 
 [dev-packages]

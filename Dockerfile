@@ -27,7 +27,7 @@ COPY Pipfile Pipfile.lock ./
 # --system installs packages system wide, i.e no virtualenv
 # --deploy will fail a build if the Pipfile.lock is out–of–date
 # --dev also installs dev-packages
-RUN pipenv --bare install --deploy --dev \
+RUN pipenv install --deploy --dev \
  && pipenv lock -r > requirements.txt
 
 COPY hello_world/app.py setup.py setup.cfg ./
