@@ -1,4 +1,5 @@
-FROM ubuntu:18.04 as build
+# Python 3.7 + Python.h (/usr/local/include/python3.7m/Python.h): 143M
+FROM python:3.7-slim-stretch as build
 
 # https://medium.com/@greut/building-a-python-package-a-docker-image-using-pipenv-233d8793b6cc
 
@@ -14,7 +15,7 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get update --quiet \
  && apt-get install -y --quiet \
         libpq-dev \
-        python3-pip \
+        gcc \
  && python3 -m pip install --upgrade pip wheel pipenv \
  && rm -rf /var/lib/apt/lists/*
 
@@ -44,8 +45,8 @@ EXPOSE 5000
 
 
 
-
-FROM ubuntu:18.04 as run
+# Python 3.7: 69MB
+FROM debian:buster-slim as run
 
 ARG DEBIAN_FRONTEND=noninteractive
 
