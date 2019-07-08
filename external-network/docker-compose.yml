@@ -1,0 +1,18 @@
+version: "3.7"
+services:
+  # This is pinging a service defined in the same docker-compose file
+  pinger1:
+    image: alpine:3.10
+    command: ping -c 10 -w 5 pinger2
+
+  pinger2:
+    hostname: db2
+    image: alpine:3.10
+    # This is pinging a service **not** defined in this docker-compose file. Hopefully the "web" service is running
+    # and connected to the network defined in networks.default.external.name
+    command: ping -c 10 -w 5 web
+
+networks:
+  default:
+    external:
+      name: gitlab-playground_default

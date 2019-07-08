@@ -7,15 +7,14 @@ FROM python:3.7-slim-stretch as build
 # https://github.com/moby/moby/issues/4032#issuecomment-192327844
 ARG DEBIAN_FRONTEND=noninteractive
 
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV LC_ALL=C.UTF-8 LANG=C.UTF-8
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 
 RUN apt-get update --quiet \
- && apt-get install -y --quiet \
-        libpq-dev \
+ && apt-get install -y --quiet --no-install-recommends \
         gcc \
+        libc-dev \
+        libpq-dev \
  && python3 -m pip install --upgrade pip wheel pipenv \
  && rm -rf /var/lib/apt/lists/*
 
@@ -52,13 +51,17 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 COPY --from=build /app/dist/*.whl .
 
-RUN apt-get update --quiet && apt-get install -y --quiet \
+RUN apt-get update --quiet \
+ && apt-get install -y --quiet --no-install-recommends \
+        gcc \
         libpq-dev \
-        python3-wheel \
+        python3-dev \
         python3-pip \
+        python3-setuptools \
+        python3-wheel \
         uwsgi-plugin-python3 \
  && python3 -m pip install *.whl \
- && apt-get remove -y python3-pip python3-wheel \
+ && apt-get remove -y python3-pip python3-wheel gcc python3-dev python3-setuptools \
  && apt-get autoremove -y \
  && apt-get clean -y \
  && rm -f *.whl \
