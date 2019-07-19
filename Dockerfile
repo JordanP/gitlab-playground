@@ -15,7 +15,7 @@ RUN apt-get update --quiet \
         gcc \
         libc-dev \
         libpq-dev \
- && python3 -m pip install --upgrade pip wheel pipenv \
+ && python3 -m pip install --no-cache-dir --upgrade pip wheel pipenv \
  && rm -rf /var/lib/apt/lists/*
 
 
@@ -60,14 +60,13 @@ RUN apt-get update --quiet \
         python3-setuptools \
         python3-wheel \
         uwsgi-plugin-python3 \
- && python3 -m pip install *.whl \
+ && python3 -m pip install --no-cache-dir *.whl \
  && apt-get remove -y python3-pip python3-wheel gcc python3-dev python3-setuptools \
  && apt-get autoremove -y \
  && apt-get clean -y \
  && rm -f *.whl \
  && rm -rf /var/lib/apt/lists/* \
- && mkdir -p /app \
- && useradd _uwsgi --no-create-home --user-group
+ && useradd --system --create-home --user-group --home-dir /app _uwsgi
 
 USER _uwsgi
 #ADD static /app/static
