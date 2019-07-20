@@ -61,8 +61,7 @@ RUN apt-get update --quiet \
         python3-wheel \
         uwsgi-plugin-python3 \
  && python3 -m pip install --no-cache-dir *.whl \
- && apt-get remove -y python3-pip python3-wheel gcc python3-dev python3-setuptools \
- && apt-get autoremove -y \
+ && apt-get purge -y --auto-remove python3-pip python3-wheel gcc python3-dev python3-setuptools \
  && apt-get clean -y \
  && rm -f *.whl \
  && rm -rf /var/lib/apt/lists/* \
